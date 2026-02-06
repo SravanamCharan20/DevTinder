@@ -11,3 +11,18 @@ export const signupValidator = (req) => {
   }
 };
 
+export const profileEditValidator = (req) => {
+  const AllowEditOptions = [
+    "firstName",
+    "lastName",
+    "gender",
+    "about",
+    "skills",
+  ];
+
+  const isVaildEdit = Object.keys(req.body).every((field) =>
+    AllowEditOptions.includes(field)
+  );
+
+  return isVaildEdit;
+}
