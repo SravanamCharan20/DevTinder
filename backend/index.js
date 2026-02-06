@@ -4,6 +4,7 @@ import User from "./models/User.js";
 import bcrypt from "bcryptjs";
 import { signupValidator } from "./utils/validator.js";
 import validator from "validator";
+import jwt from 'jsonwebtoken';
 
 const app = express();
 app.use(express.json());
@@ -50,10 +51,8 @@ app.post("/user/signin", async (req, res) => {
         .json({ message: "Email not found please signup!!" });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      isExistedUser.password
-    );
+    const isPasswordCorrect = User.validatePassword(password);
+    
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Enter correct password!!" });
     }
