@@ -4,7 +4,7 @@ import User from "./models/User.js";
 import bcrypt from "bcryptjs";
 import { signupValidator } from "./utils/validator.js";
 import validator from "validator";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 const app = express();
 app.use(express.json());
@@ -12,22 +12,14 @@ app.use(express.json());
 app.post("/user/signup", async (req, res) => {
   try {
     signupValidator(req);
-    const { firstName, lastName, password, email } = req.body;
+    const { email } = req.body;
     const ExistedUser = await User.findOne({ email });
     if (ExistedUser) {
       return res.status(400).json({ message: "Email Already Exist!!" });
     }
 
-    const Hashedpassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      firstName,
-      lastName,
-      password: Hashedpassword,
-      email,
-    });
-
+    const newUser = new User(req.body);
     const savedUser = await newUser.save();
-
     res
       .status(201)
       .json({ message: "User Created Successfully", userData: savedUser });
@@ -51,8 +43,8 @@ app.post("/user/signin", async (req, res) => {
         .json({ message: "Email not found please signup!!" });
     }
 
-    const isPasswordCorrect = User.validatePassword(password);
-    
+    const isPasswordCorrect = await isExistedUser.validatePassword(password);
+
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Enter correct password!!" });
     }

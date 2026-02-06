@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -27,10 +28,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      validator(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error("Invalid Email Address: " + value);
-        }
+      validate: {
+        validator(value) {
+          return validator.isEmail(value);
+        },
+        message: "Invalid Email Address",
       },
     },
     gender: {
@@ -50,6 +52,10 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.pre("save", async function () {
+  this.password = await bcrypt.hash(this.password, 10);
+});
 
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
   const user = this;
